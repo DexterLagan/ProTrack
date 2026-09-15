@@ -35,7 +35,7 @@ body {
 .add-btn {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 8px;
   background: #007aff;
   color: white;
   border: none;
