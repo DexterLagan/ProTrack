@@ -1,4 +1,4 @@
-use tauri::{menu::{Menu, MenuItem, Submenu}, Emitter, Manager};
+use tauri::{menu::{Menu, MenuItem, Submenu}, Manager};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -21,12 +21,12 @@ pub fn run() {
             match event.id().as_ref() {
                 "about" => {
                     if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.emit("menu-about", ());
+                        let _ = window.eval("document.getElementById('about-dialog').showModal();");
                     }
                 }
                 "settings" => {
                     if let Some(window) = app.get_webview_window("main") {
-                        let _ = window.emit("menu-settings", ());
+                        let _ = window.eval("openSettings();");
                     }
                 }
                 "quit" => {

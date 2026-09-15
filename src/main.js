@@ -336,24 +336,9 @@ function renderSettingsContent(tab) {
   });
 }
 
-// Tauri menu integration
-async function setupMenu() {
-  try {
-    const { listen } = await import('@tauri-apps/api/event');
-
-    await listen('menu-about', () => {
-      document.getElementById('about-dialog').showModal();
-    });
-
-    await listen('menu-settings', () => {
-      openSettings();
-    });
-  } catch (e) {
-    // Running in browser, no Tauri API
-  }
-}
-
 // Initialize
 loadState();
 renderProjects();
-setupMenu();
+
+// Expose functions to global scope for Tauri eval calls
+window.openSettings = openSettings;
