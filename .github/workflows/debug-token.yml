@@ -1,0 +1,21 @@
+name: Debug Token
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test GITHUB_TOKEN permissions
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== /user ==="
+          curl -s -H "Authorization: Bearer $TOKEN" https://api.github.com/user | head -c 500
+          echo ""
+          echo "=== repo access ==="
+          curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" https://api.github.com/repos/DexterLagan/ProTrack
+          echo ""
+          echo "=== list releases ==="
+          curl -s -H "Authorization: Bearer $TOKEN" https://api.github.com/repos/DexterLagan/ProTrack/releases | head -c 500
