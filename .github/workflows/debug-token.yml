@@ -17,5 +17,5 @@ jobs:
           echo "=== repo access ==="
           curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" https://api.github.com/repos/DexterLagan/ProTrack
           echo ""
-          echo "=== list releases ==="
-          curl -s -H "Authorization: Bearer $TOKEN" https://api.github.com/repos/DexterLagan/ProTrack/releases | head -c 500
+          echo "=== create release test ==="
+          curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"tag_name":"v0.1.0","name":"perm-test"}' https://api.github.com/repos/DexterLagan/ProTrack/releases
