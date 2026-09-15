@@ -339,15 +339,13 @@ function renderSettingsContent(tab) {
 // Tauri menu integration
 async function setupMenu() {
   try {
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    const win = getCurrentWindow();
+    const { listen } = await import('@tauri-apps/api/event');
 
-    // Listen for menu events from Rust side
-    window.__TAURI__.event.listen('menu-about', () => {
+    await listen('menu-about', () => {
       document.getElementById('about-dialog').showModal();
     });
 
-    window.__TAURI__.event.listen('menu-settings', () => {
+    await listen('menu-settings', () => {
       openSettings();
     });
   } catch (e) {
