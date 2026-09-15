@@ -181,7 +181,7 @@ body {
 dialog {
   border: none;
   border-radius: 12px;
-  padding: 0;
+  padding: 24px;
   max-width: 500px;
   width: 90%;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -190,6 +190,10 @@ dialog {
   left: 50%;
   transform: translate(-50%, -50%);
   margin: 0;
+}
+
+dialog form {
+  padding: 0;
 }
 
 dialog::backdrop {
