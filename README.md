@@ -57,6 +57,22 @@ npm run tauri build
 
 This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
+## Version History
+
+### v0.1.1 (2026-09-15)
+
+- Custom ProTrack app icon (replaces default Tauri template icon) across all platforms
+
+### v0.1.0 (2026-09-15)
+
+- Initial release
+- Project creation with weighted milestones (totaling 100%)
+- Automatic progress tracking as milestones are completed
+- Drag & drop reordering of project cards
+- Archive / restore / delete projects via Settings dialog
+- Menu bar: About, Quit (⌘Q), Settings
+- Builds for macOS (Apple Silicon), Windows, and Linux
+
 ## License
 
 MIT © Dexter Santucci
