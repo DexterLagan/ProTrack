@@ -1,3 +1,53 @@
+:root {
+  --bg: #f5f5f7;
+  --panel: #ffffff;
+  --panel-border: #e5e5ea;
+  --text: #1d1d1f;
+  --text-muted: #666666;
+  --text-faint: #999999;
+  --accent: #007aff;
+  --accent-hover: #0056b3;
+  --accent-contrast: #ffffff;
+  --card: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: rgba(0, 0, 0, 0.15);
+  --track: #e5e5ea;
+  --green: #34c759;
+  --red: #ff3b30;
+  --red-soft: #ffe5e5;
+  --hover-surface: #f5f5f7;
+  --input-border: #dddddd;
+  --dialog-backdrop: rgba(0, 0, 0, 0.4);
+  --secondary-bg: #f0f0f0;
+  --secondary-text: #333333;
+  --divider: #eeeeee;
+}
+
+[data-theme='dark'] {
+  --bg: #1c1c1e;
+  --panel: #2c2c2e;
+  --panel-border: #3a3a3c;
+  --text: #f5f5f7;
+  --text-muted: #aeaeb2;
+  --text-faint: #8e8e93;
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-contrast: #ffffff;
+  --card: #2c2c2e;
+  --card-shadow: rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: rgba(0, 0, 0, 0.7);
+  --track: #3a3a3c;
+  --green: #30d158;
+  --red: #ff453a;
+  --red-soft: #4a1f1c;
+  --hover-surface: #3a3a3c;
+  --input-border: #48484a;
+  --dialog-backdrop: rgba(0, 0, 0, 0.6);
+  --secondary-bg: #3a3a3c;
+  --secondary-text: #f5f5f7;
+  --divider: #3a3a3c;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,10 +56,11 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  background: var(--bg);
+  color: var(--text);
   height: 100vh;
   overflow: hidden;
+  transition: background 0.2s, color 0.2s;
 }
 
 .app-container {
@@ -23,8 +74,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e5e5ea;
+  background: var(--panel);
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .app-title {
@@ -32,12 +83,18 @@ body {
   font-weight: 600;
 }
 
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .add-btn {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: #007aff;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   font-size: 24px;
   line-height: 1;
@@ -50,7 +107,31 @@ body {
 }
 
 .add-btn:hover {
-  background: #0056b3;
+  background: var(--accent-hover);
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--hover-surface);
+  color: var(--text);
+}
+
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .projects-container {
@@ -62,12 +143,18 @@ body {
   overflow-y: hidden;
 }
 
+.empty-state {
+  color: var(--text-faint);
+  font-size: 14px;
+  margin: auto;
+}
+
 .project-card {
   flex: 1;
   min-width: 280px;
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--card-shadow);
   display: flex;
   flex-direction: column;
   cursor: grab;
@@ -75,7 +162,7 @@ body {
 }
 
 .project-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px var(--card-shadow-hover);
 }
 
 .project-card.dragging {
@@ -86,42 +173,58 @@ body {
 .project-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 4px;
   padding: 14px 16px 8px;
 }
 
 .project-title-input {
   font-size: 16px;
   font-weight: 700;
+  color: var(--text);
   border: none;
   background: transparent;
   flex: 1;
+  min-width: 0;
   outline: none;
   padding: 4px;
   border-radius: 4px;
 }
 
 .project-title-input:focus {
-  background: #f5f5f7;
+  background: var(--hover-surface);
 }
 
-.archive-btn {
+.card-action-btn {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: #999;
-  font-size: 16px;
+  font-size: 17px;
+  line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  transition: background 0.15s, color 0.15s;
+}
+
+.add-milestone-btn {
+  color: var(--accent);
+}
+
+.add-milestone-btn:hover {
+  background: var(--hover-surface);
+}
+
+.archive-btn {
+  color: var(--text-faint);
 }
 
 .archive-btn:hover {
-  background: #ffe5e5;
-  color: #ff3b30;
+  background: var(--red-soft);
+  color: var(--red);
 }
 
 .project-progress {
@@ -130,20 +233,20 @@ body {
 
 .progress-bar-bg {
   height: 6px;
-  background: #e5e5ea;
+  background: var(--track);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: #34c759;
+  background: var(--green);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 12px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 4px;
   text-align: right;
 }
@@ -158,23 +261,76 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 0;
+  padding: 5px 0;
   font-size: 14px;
 }
 
 .milestone-checkbox {
   width: 18px;
   height: 18px;
+  flex: 0 0 auto;
   cursor: pointer;
+  accent-color: var(--accent);
 }
 
 .milestone-label {
   flex: 1;
+  min-width: 0;
+  cursor: text;
+  padding: 2px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.milestone-label:hover {
+  background: var(--hover-surface);
+}
+
+.milestone-edit-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 2px 4px;
+  outline: none;
 }
 
 .milestone-item.completed .milestone-label {
   text-decoration: line-through;
-  color: #999;
+  color: var(--text-faint);
+}
+
+.delete-milestone-btn {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.milestone-item:hover .delete-milestone-btn {
+  opacity: 1;
+}
+
+.delete-milestone-btn:hover {
+  background: var(--red-soft);
+  color: var(--red);
 }
 
 /* Dialogs */
@@ -184,7 +340,11 @@ dialog {
   padding: 24px;
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  max-height: 85vh;
+  overflow-y: auto;
+  color: var(--text);
+  background: var(--panel);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   position: fixed;
   top: 50%;
   left: 50%;
@@ -192,16 +352,8 @@ dialog {
   margin: 0;
 }
 
-dialog form {
-  padding: 0;
-}
-
 dialog::backdrop {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-dialog form, dialog > div {
-  padding: 24px;
+  background: var(--dialog-backdrop);
 }
 
 dialog h2 {
@@ -212,17 +364,25 @@ dialog h2 {
 dialog label {
   display: block;
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
-dialog input[type="text"] {
+dialog input[type='text'] {
   width: 100%;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg);
   margin-bottom: 16px;
+}
+
+dialog input[type='text']:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 .milestones-section {
@@ -236,7 +396,7 @@ dialog input[type="text"] {
 
 .hint {
   font-size: 12px;
-  color: #999;
+  color: var(--text-faint);
   margin-bottom: 8px;
 }
 
@@ -247,39 +407,58 @@ dialog input[type="text"] {
   margin-bottom: 8px;
 }
 
-#milestones-list input[type="text"] {
+#milestones-list input[type='text'] {
   flex: 1;
   margin-bottom: 0;
 }
 
-#milestones-list input[type="number"] {
-  width: 70px;
-  padding: 8px;
-  border: 1px solid #ddd;
+.weight-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+#milestones-list input[type='number'] {
+  width: 68px;
+  padding: 8px 22px 8px 8px;
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--bg);
+}
+
+#milestones-list input[type='number']:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.weight-input-wrap .percent-sign {
+  position: absolute;
+  right: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+  pointer-events: none;
 }
 
 .remove-milestone-btn {
   background: none;
   border: none;
-  color: #ff3b30;
+  color: var(--red);
   cursor: pointer;
   font-size: 18px;
+  line-height: 1;
+  padding: 4px;
+  flex: 0 0 auto;
 }
 
 .total-display {
   font-size: 13px;
   font-weight: 600;
   margin-top: 8px;
-}
-
-.total-display.valid {
-  color: #34c759;
-}
-
-.total-display.invalid {
-  color: #ff3b30;
+  color: var(--green);
 }
 
 .dialog-actions {
@@ -289,7 +468,9 @@ dialog input[type="text"] {
   margin-top: 16px;
 }
 
-button[type="submit"], .secondary-btn, .danger-btn {
+button[type='submit'],
+.secondary-btn,
+.danger-btn {
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 14px;
@@ -297,24 +478,24 @@ button[type="submit"], .secondary-btn, .danger-btn {
   border: none;
 }
 
-button[type="submit"] {
-  background: #007aff;
-  color: white;
+button[type='submit'] {
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
-button[type="submit"]:disabled {
+button[type='submit']:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 .secondary-btn {
-  background: #f0f0f0;
-  color: #333;
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
 }
 
 .danger-btn {
-  background: #ff3b30;
-  color: white;
+  background: var(--red);
+  color: #ffffff;
 }
 
 .cancel-btn {
@@ -324,7 +505,7 @@ button[type="submit"]:disabled {
   cursor: pointer;
   border: none;
   background: transparent;
-  color: #666;
+  color: var(--text-muted);
 }
 
 /* Settings */
@@ -341,12 +522,12 @@ button[type="submit"]:disabled {
   background: transparent;
   cursor: pointer;
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
 }
 
 .tab-btn.active {
-  background: #007aff;
-  color: white;
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .settings-project-item {
@@ -354,7 +535,7 @@ button[type="submit"]:disabled {
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--divider);
 }
 
 .settings-project-actions button {
@@ -367,17 +548,17 @@ button[type="submit"]:disabled {
 }
 
 .restore-btn {
-  background: #34c759;
-  color: white;
+  background: var(--green);
+  color: #ffffff;
 }
 
 .delete-btn {
-  background: #ff3b30;
-  color: white;
+  background: var(--red);
+  color: #ffffff;
 }
 
 .credit {
   font-size: 13px;
-  color: #666;
+  color: var(--text-muted);
   margin-top: 8px;
 }
