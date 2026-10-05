@@ -72,6 +72,10 @@ This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
 ## Version History
 
+### v0.2.1 (2026-10-04)
+
+- Milestone text now wraps to multiple lines instead of being truncated
+
 ### v0.2.0 (2026-09-16)
 
 - Edit existing projects: add, rename, re-weight, and delete milestones after creation

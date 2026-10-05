@@ -259,7 +259,7 @@ body {
 
 .milestone-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 5px 0;
   font-size: 14px;
@@ -269,6 +269,7 @@ body {
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+  margin-top: 1px;
   cursor: pointer;
   accent-color: var(--accent);
 }
@@ -279,9 +280,9 @@ body {
   cursor: text;
   padding: 2px 4px;
   border-radius: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .milestone-label:hover {
@@ -310,6 +311,7 @@ body {
   width: 22px;
   height: 22px;
   flex: 0 0 auto;
+  margin-top: 1px;
   border: none;
   background: transparent;
   color: var(--text-faint);
