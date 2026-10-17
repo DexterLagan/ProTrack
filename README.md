@@ -72,6 +72,10 @@ This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
 ## Version History
 
+### v0.2.2 (2026-10-05)
+
+- Projects now wrap into multiple rows instead of a single scrolling row; each project scrolls its own milestone list
+
 ### v0.2.1 (2026-10-04)
 
 - Milestone text now wraps to multiple lines instead of being truncated
