@@ -30,6 +30,66 @@ function saveState() {
 // ---------- Theme ----------
 const MOON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 const SUN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`;
+const COPY_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+// ---------- Zoom & fullscreen ----------
+let currentZoom = 1;
+
+function fallbackZoom() {
+  document.documentElement.style.zoom = currentZoom;
+}
+
+function applyZoom(scale, persist = true) {
+  currentZoom = Math.min(2, Math.max(0.5, Math.round(scale * 10) / 10));
+  if (persist) localStorage.setItem('protrack_zoom', String(currentZoom));
+  try {
+    window.__TAURI__.webview.getCurrentWebview().setZoom(currentZoom).catch(fallbackZoom);
+  } catch (e) {
+    fallbackZoom();
+  }
+}
+
+function initZoom() {
+  const saved = parseFloat(localStorage.getItem('protrack_zoom'));
+  currentZoom = Number.isFinite(saved) ? saved : 1;
+  if (currentZoom !== 1) applyZoom(currentZoom, false);
+}
+
+async function toggleFullscreen() {
+  try {
+    const win = window.__TAURI__.window.getCurrentWindow();
+    const isFs = await win.isFullscreen();
+    await win.setFullscreen(!isFs);
+  } catch (e) {}
+}
+
+function handleShortcuts(e) {
+  const key = (e.key || '').toLowerCase();
+  const fnDown =
+    typeof e.getModifierState === 'function' && e.getModifierState('Fn');
+
+  // Fullscreen: Ctrl+Cmd+F (macOS), Fn+F (where reported), F11
+  if ((key === 'f' && ((e.metaKey && e.ctrlKey) || fnDown)) || e.key === 'F11') {
+    e.preventDefault();
+    toggleFullscreen();
+    return;
+  }
+
+  // Zoom: Cmd/Ctrl + '=' or '+' (no Shift required) enlarges, '-' shrinks, '0' resets
+  if (e.metaKey || e.ctrlKey) {
+    if (e.key === '=' || e.key === '+') {
+      e.preventDefault();
+      applyZoom(currentZoom + 0.1);
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      applyZoom(currentZoom - 0.1);
+    } else if (e.key === '0') {
+      e.preventDefault();
+      applyZoom(1);
+    }
+  }
+}
 
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -109,6 +169,59 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function buildProjectPrompt(project) {
+  const pending = project.milestones.filter((m) => !m.completed);
+  const lines = [];
+  lines.push('Here is the list of items to implement next:');
+  lines.push('');
+  if (pending.length === 0) {
+    lines.push('No remaining milestones.');
+  } else {
+    pending.forEach((m) => lines.push(`- ${m.title}`));
+  }
+  return lines.join('\n');
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.top = '-9999px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+async function copyProjectPrompt(projectIndex, btn) {
+  const project = projects[projectIndex];
+  if (!project) return;
+  const ok = await copyText(buildProjectPrompt(project));
+  if (!ok) return;
+
+  const original = btn.innerHTML;
+  btn.innerHTML = CHECK_SVG;
+  btn.classList.add('copied');
+  btn.title = 'Copied!';
+  setTimeout(() => {
+    btn.innerHTML = original;
+    btn.classList.remove('copied');
+    btn.title = 'Copy milestones as prompt';
+  }, 1500);
+}
+
 // ---------- Rendering ----------
 function renderProjects() {
   const container = document.getElementById('projects-container');
@@ -130,6 +243,7 @@ function renderProjects() {
     card.innerHTML = `
       <div class="project-header">
         <input type="text" class="project-title-input" value="${escapeHtml(project.title)}" data-index="${index}" />
+        <button class="card-action-btn copy-btn" data-index="${index}" title="Copy milestones as prompt">${COPY_SVG}</button>
         <button class="card-action-btn add-milestone-btn" data-index="${index}" title="Add / edit milestones">+</button>
         <button class="card-action-btn archive-btn" data-index="${index}" title="Archive">×</button>
       </div>
@@ -197,6 +311,12 @@ function attachCardEventListeners() {
   document.querySelectorAll('.add-milestone-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       openProjectDialog(parseInt(btn.dataset.index, 10));
+    });
+  });
+
+  document.querySelectorAll('.copy-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      copyProjectPrompt(parseInt(btn.dataset.index, 10), btn);
     });
   });
 
@@ -317,6 +437,9 @@ function openProjectDialog(index = null) {
       weight: m.weight,
       completed: !!m.completed
     }));
+    // Start a fresh empty milestone so the user can type a new one right away
+    draftMilestones.push({ title: '', weight: 20, completed: false });
+    rebalanceKeeping(draftMilestones, draftMilestones.length - 1);
   } else {
     document.getElementById('project-title').value = '';
     draftMilestones = [{ title: '', weight: 100, completed: false }];
@@ -325,6 +448,19 @@ function openProjectDialog(index = null) {
   renderDialogMilestones();
   updateProjectFormState();
   document.getElementById('project-dialog').showModal();
+  focusMilestoneTitle(isEdit ? draftMilestones.length - 1 : 0);
+}
+
+function focusMilestoneTitle(index) {
+  const rows = document.querySelectorAll('#milestones-list .milestone-row');
+  const row = rows[index];
+  if (!row) return;
+  const input = row.querySelector('.ms-title');
+  input.focus();
+  const len = input.value.length;
+  try {
+    input.setSelectionRange(len, len);
+  } catch (e) {}
 }
 
 function renderDialogMilestones() {
@@ -377,8 +513,8 @@ function updateMilestoneTotal() {
 
 function updateProjectFormState() {
   const title = document.getElementById('project-title').value.trim();
-  const anyEmpty = draftMilestones.some((m) => !m.title.trim());
-  document.getElementById('save-project-btn').disabled = !title || anyEmpty;
+  // Empty milestones are allowed here; they are discarded automatically on save.
+  document.getElementById('save-project-btn').disabled = !title;
 }
 
 document.getElementById('add-project-btn').addEventListener('click', () => {
@@ -390,6 +526,7 @@ document.getElementById('add-milestone-btn').addEventListener('click', () => {
   rebalanceKeeping(draftMilestones, draftMilestones.length - 1);
   renderDialogMilestones();
   updateProjectFormState();
+  focusMilestoneTitle(draftMilestones.length - 1);
 });
 
 document.getElementById('project-title').addEventListener('input', updateProjectFormState);
@@ -517,8 +654,11 @@ function renderSettingsContent(tab) {
 
 // ---------- Initialize ----------
 initTheme();
+initZoom();
 loadState();
 renderProjects();
+
+document.addEventListener('keydown', handleShortcuts);
 
 document.getElementById('theme-toggle').addEventListener('click', () => {
   const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';

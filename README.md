@@ -11,10 +11,14 @@ A simple project tracker for managing milestones and progress. Built with Rust a
 - Edit projects after creation: add, rename, re-weight, and delete milestones
 - Click a milestone to edit its text inline; delete with the `×` confirmation dialog
 - Weights auto-rebalance to 100% when milestones are added or removed
+- The `+` button opens the editor with a new empty milestone focused and ready to type
+- Blank milestones are discarded automatically when saving
+- Copy a project's remaining milestones as a ready-to-paste coding-agent prompt
 - Drag & drop to reorder projects
 - Archive and restore projects
 - Dark / light mode toggle (follows the OS on first launch, remembers your choice)
-- Responsive layout that fills the window
+- Fullscreen and UI zoom keyboard shortcuts
+- Responsive wrapping grid layout with per-project milestone scrolling
 
 ### New Project
 
@@ -30,6 +34,27 @@ The small `+` button next to a project's title re-opens the project editor, wher
 
 Use the sun/moon button in the top-right of the toolbar to switch between light and dark mode. ProTrack follows your system appearance on first launch and remembers your choice afterwards.
 
+### Copy as Prompt
+
+Each project header has a copy button that copies its remaining (unchecked) milestones as a plain list, ready to paste into a coding agent:
+
+```
+Here is the list of items to implement next:
+
+- Milestone one
+- Milestone two
+```
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl`+`Cmd`+`F` (macOS) / `F11` | Toggle fullscreen |
+| `Cmd`+`=` or `Cmd`+`+` | Zoom in (Shift not required) |
+| `Cmd`+`-` | Zoom out |
+| `Cmd`+`0` | Reset zoom |
+| `Cmd`+`Q` | Quit |
+
 ### Settings
 
 ![Settings](screenshots/ProTrack-settings.png)
@@ -44,7 +69,7 @@ Manage active and archived projects from the Settings dialog (File > Settings). 
 | **Backend** | Rust |
 | **Frontend** | Vanilla HTML/CSS/JavaScript |
 | **Window Size** | 1200×800 (min 900×600), resizable |
-| **Layout** | Horizontal flexbox, equal-width project cards |
+| **Layout** | Responsive wrapping grid; each card scrolls its milestones |
 | **Data Storage** | localStorage (JSON) |
 | **Theming** | Light / dark mode via CSS variables |
 | **Platforms** | macOS (Apple Silicon & Intel), Windows, Linux |
@@ -71,6 +96,13 @@ npm run tauri build
 This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
 ## Version History
+
+### v0.3.0 (2026-10-20)
+
+- Fullscreen shortcut (`Ctrl`+`Cmd`+`F`, `F11`) and UI zoom shortcuts (`Cmd`+`=`, `Cmd`+`-`, `Cmd`+`0`)
+- Opening a project's `+` adds a focused empty milestone; `Add Milestone` focuses the new row
+- Saving with blank milestones is allowed; blanks are discarded and weights rebalanced
+- Copy a project's remaining milestones as a plain coding-agent prompt
 
 ### v0.2.2 (2026-10-05)
 

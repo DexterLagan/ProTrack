@@ -213,6 +213,24 @@ body {
   transition: background 0.15s, color 0.15s;
 }
 
+.card-action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.copy-btn {
+  color: var(--text-faint);
+}
+
+.copy-btn:hover {
+  background: var(--hover-surface);
+  color: var(--text);
+}
+
+.copy-btn.copied {
+  color: var(--green);
+}
+
 .add-milestone-btn {
   color: var(--accent);
 }
