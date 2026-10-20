@@ -652,9 +652,19 @@ function renderSettingsContent(tab) {
   });
 }
 
+// ---------- Version ----------
+async function initVersion() {
+  try {
+    const version = await window.__TAURI__.app.getVersion();
+    const el = document.getElementById('about-version');
+    if (el) el.textContent = `Version ${version}`;
+  } catch (e) {}
+}
+
 // ---------- Initialize ----------
 initTheme();
 initZoom();
+initVersion();
 loadState();
 renderProjects();
 

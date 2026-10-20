@@ -586,3 +586,9 @@ button[type='submit']:disabled {
   color: var(--text-muted);
   margin-top: 8px;
 }
+
+.version {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 6px;
+}
