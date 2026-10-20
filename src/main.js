@@ -1,6 +1,6 @@
 let projects = [];
 let archivedProjects = [];
-let dragSrcEl = null;
+let pointerDrag = null;
 
 // Dialog state
 let draftMilestones = [];
@@ -32,6 +32,7 @@ const MOON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const SUN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`;
 const COPY_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
 const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const GRIP_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>`;
 
 // ---------- Zoom & fullscreen ----------
 let currentZoom = 1;
@@ -235,13 +236,13 @@ function renderProjects() {
   projects.forEach((project, index) => {
     const card = document.createElement('div');
     card.className = 'project-card';
-    card.draggable = true;
     card.dataset.index = index;
 
     const progress = projectProgress(project.milestones);
 
     card.innerHTML = `
       <div class="project-header">
+        <span class="drag-handle" title="Drag to reorder">${GRIP_SVG}</span>
         <input type="text" class="project-title-input" value="${escapeHtml(project.title)}" data-index="${index}" />
         <button class="card-action-btn copy-btn" data-index="${index}" title="Copy milestones as prompt">${COPY_SVG}</button>
         <button class="card-action-btn add-milestone-btn" data-index="${index}" title="Add / edit milestones">+</button>
@@ -270,11 +271,6 @@ function renderProjects() {
         }
       </div>
     `;
-
-    card.addEventListener('dragstart', handleDragStart);
-    card.addEventListener('dragover', handleDragOver);
-    card.addEventListener('drop', handleDrop);
-    card.addEventListener('dragend', handleDragEnd);
 
     container.appendChild(card);
   });
@@ -338,17 +334,14 @@ function attachCardEventListeners() {
     });
   });
 
-  // Prevent dragging the card while interacting with its controls
+  // Pointer-based drag to reorder projects (HTML5 DnD is unreliable in the webview)
   document.querySelectorAll('.project-card').forEach((card) => {
-    card.querySelectorAll('input, button, .milestone-label').forEach((el) => {
-      el.addEventListener('mousedown', () => {
-        card.draggable = false;
-        const restore = () => {
-          card.draggable = true;
-          document.removeEventListener('mouseup', restore);
-        };
-        document.addEventListener('mouseup', restore);
-      });
+    card.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      const onHandle = e.target.closest('.drag-handle');
+      const onControl = e.target.closest('input, button, .milestone-label');
+      if (!onHandle && onControl) return;
+      startPointerDrag(e, parseInt(card.dataset.index, 10), card);
     });
   });
 }
@@ -391,34 +384,63 @@ function startMilestoneEdit(span) {
   input.addEventListener('blur', () => finish(true));
 }
 
-// ---------- Drag & Drop ----------
-function handleDragStart(e) {
-  dragSrcEl = this;
-  e.dataTransfer.effectAllowed = 'move';
-  setTimeout(() => this.classList.add('dragging'), 0);
-}
-
-function handleDragOver(e) {
-  if (this === dragSrcEl) return;
+// ---------- Drag & Drop (pointer based) ----------
+function startPointerDrag(e, index, card) {
+  if (pointerDrag) return;
   e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
+  pointerDrag = {
+    srcIndex: index,
+    card,
+    pointerId: e.pointerId,
+    active: false,
+    startX: e.clientX,
+    startY: e.clientY
+  };
+  try {
+    card.setPointerCapture(e.pointerId);
+  } catch (_) {}
+  card.addEventListener('pointermove', onPointerDragMove);
+  card.addEventListener('pointerup', onPointerDragEnd);
+  card.addEventListener('pointercancel', onPointerDragEnd);
 }
 
-function handleDrop(e) {
-  e.stopPropagation();
-  const srcIndex = parseInt(dragSrcEl.dataset.index, 10);
-  const destIndex = parseInt(this.dataset.index, 10);
-  if (srcIndex !== destIndex && !isNaN(srcIndex) && !isNaN(destIndex)) {
+function onPointerDragMove(e) {
+  if (!pointerDrag) return;
+
+  if (!pointerDrag.active) {
+    const dx = e.clientX - pointerDrag.startX;
+    const dy = e.clientY - pointerDrag.startY;
+    if (Math.hypot(dx, dy) < 4) return;
+    pointerDrag.active = true;
+    pointerDrag.card.classList.add('dragging');
+  }
+
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const target = el && el.closest('.project-card');
+  document.querySelectorAll('.project-card.drop-target').forEach((c) => c.classList.remove('drop-target'));
+  if (target && target !== pointerDrag.card) target.classList.add('drop-target');
+}
+
+function onPointerDragEnd(e) {
+  if (!pointerDrag) return;
+  const { srcIndex, card, active } = pointerDrag;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const target = el && el.closest('.project-card');
+  const destIndex = target ? parseInt(target.dataset.index, 10) : srcIndex;
+
+  card.classList.remove('dragging');
+  document.querySelectorAll('.project-card.drop-target').forEach((c) => c.classList.remove('drop-target'));
+  card.removeEventListener('pointermove', onPointerDragMove);
+  card.removeEventListener('pointerup', onPointerDragEnd);
+  card.removeEventListener('pointercancel', onPointerDragEnd);
+  pointerDrag = null;
+
+  if (active && !isNaN(destIndex) && destIndex !== srcIndex) {
     const [moved] = projects.splice(srcIndex, 1);
     projects.splice(destIndex, 0, moved);
     saveState();
     renderProjects();
   }
-}
-
-function handleDragEnd() {
-  this.classList.remove('dragging');
-  dragSrcEl = null;
 }
 
 // ---------- Project dialog (new & edit) ----------

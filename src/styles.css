@@ -173,11 +173,40 @@ body {
   cursor: grabbing;
 }
 
+.project-card.drop-target {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
 .project-header {
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 14px 16px 8px;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 24px;
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  cursor: grab;
+  opacity: 0.6;
+  touch-action: none;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  color: var(--text-muted);
+}
+
+.drag-handle svg {
+  width: 16px;
+  height: 16px;
 }
 
 .project-title-input {

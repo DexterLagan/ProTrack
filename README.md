@@ -14,7 +14,7 @@ A simple project tracker for managing milestones and progress. Built with Rust a
 - The `+` button opens the editor with a new empty milestone focused and ready to type
 - Blank milestones are discarded automatically when saving
 - Copy a project's remaining milestones as a ready-to-paste coding-agent prompt
-- Drag & drop to reorder projects
+- Drag projects by the grip handle to reorder them (order is remembered)
 - Archive and restore projects
 - Dark / light mode toggle (follows the OS on first launch, remembers your choice)
 - Fullscreen and UI zoom keyboard shortcuts
@@ -29,6 +29,10 @@ Create a project by giving it a title and defining milestones. Each milestone ha
 ### Editing a Project
 
 The small `+` button next to a project's title re-opens the project editor, where existing milestones can be renamed, re-weighted, removed, or added. Milestone weights rebalance automatically so the total always equals 100%. On a project card, click a milestone's text to edit it inline, and use the `×` button to delete a milestone (with confirmation).
+
+### Reordering Projects
+
+Drag a project by the grip handle (⠿) at the left of its title — or by any non-interactive part of the card — and drop it on another project to move it. A dashed outline shows the drop target, and the order is saved.
 
 ### Dark Mode
 
@@ -98,6 +102,13 @@ npm run tauri build
 This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
 ## Version History
+
+### v0.3.2 (2026-10-20)
+
+- Projects can be reordered by dragging them
+  - New grip handle (⠿) in each project header; dragging also works from non-interactive card areas
+  - Custom pointer-based dragging replaces HTML5 drag-and-drop, which the Tauri webview intercepted
+  - Drop target is highlighted and the order is persisted
 
 ### v0.3.1 (2026-10-20)
 
