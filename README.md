@@ -79,6 +79,7 @@ Manage active and archived projects from the Settings dialog (File > Settings). 
 - **ProTrack > About ProTrack** — Shows app info and credit
 - **ProTrack > Quit ProTrack** (⌘Q / Ctrl+Q) — Exits the application
 - **File > Settings...** — Opens project management dialog
+- **View > Toggle Full Screen** (⌃⌘F on macOS / F11 elsewhere) — Toggles window fullscreen
 
 ## Development
 
@@ -96,6 +97,12 @@ npm run tauri build
 This produces platform-specific binaries in `src-tauri/target/release/bundle/`.
 
 ## Version History
+
+### v0.3.1 (2026-10-20)
+
+- Fullscreen now works via a native **View → Toggle Full Screen** menu item
+  - Bound to `Ctrl+Command+F` on macOS and `F11` elsewhere, the canonical OS shortcut
+  - The previous webview-only handler could not receive this chord because macOS routes it through the app menu
 
 ### v0.3.0 (2026-10-20)
 

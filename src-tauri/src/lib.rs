@@ -9,10 +9,18 @@ pub fn run() {
             let quit_item = MenuItem::with_id(app, "quit", "Quit ProTrack", true, Some("CmdOrCtrl+Q"))?;
             let settings_item = MenuItem::with_id(app, "settings", "Settings...", true, None::<&str>)?;
 
+            #[cfg(target_os = "macos")]
+            let fullscreen_accel = Some("Ctrl+Command+F");
+            #[cfg(not(target_os = "macos"))]
+            let fullscreen_accel = Some("F11");
+            let fullscreen_item =
+                MenuItem::with_id(app, "fullscreen", "Toggle Full Screen", true, fullscreen_accel)?;
+
             let app_menu = Submenu::with_items(app, "ProTrack", true, &[&about_item, &quit_item])?;
             let file_menu = Submenu::with_items(app, "File", true, &[&settings_item])?;
+            let view_menu = Submenu::with_items(app, "View", true, &[&fullscreen_item])?;
 
-            let menu = Menu::with_items(app, &[&app_menu, &file_menu])?;
+            let menu = Menu::with_items(app, &[&app_menu, &file_menu, &view_menu])?;
             app.set_menu(menu)?;
 
             Ok(())
@@ -27,6 +35,12 @@ pub fn run() {
                 "settings" => {
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.eval("openSettings();");
+                    }
+                }
+                "fullscreen" => {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let is_fullscreen = window.is_fullscreen().unwrap_or(false);
+                        let _ = window.set_fullscreen(!is_fullscreen);
                     }
                 }
                 "quit" => {
